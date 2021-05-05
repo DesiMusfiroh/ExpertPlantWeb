@@ -15,34 +15,87 @@
 
 <div class="container" style="margin-top: 50px;">
 
-    <h4 class="text-center">Manage Soils</h4><br>
+    <h4 class="text-center">Manage Plants</h4><br>
 
-    <h5># Add Soils</h5>
+    <h5># Add Plants</h5>
     <div class="card card-default">
         <div class="card-body">
-            <form id="addSoil" class="form-inline" method="POST" action="">
-                <div class="form-group mb-2">
-                    <label for="name" class="sr-only">Soil Name</label>
-                    <input id="name" type="text" class="form-control" name="name" placeholder="Name"
-                           required autofocus>
+            <form id="addPlant" method="POST" action="">
+                <div class="form-group">
+                    <label for="name">Plant Name</label>
+                    <input type="text" class="form-control" id="name" placeholder="Plant Name">
                 </div>
-                <div class="form-group mx-sm-3 mb-2">
-                    <label for="desc" class="sr-only">Desription</label>
-                    <input id="desc" type="text" class="form-control" name="desc" placeholder="Description"
-                           required autofocus>
+               
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="desc">Plant Description</label>
+                        <textarea class="form-control" id="desc" rows="3"></textarea>
+                        </div>
+                        <div class="form-group col-md-6">
+                        <label for="benefit">Plant Benefits</label>
+                        <textarea class="form-control" id="benefit" rows="3"></textarea>
+                    </div>
                 </div>
-                <button id="saveSoil" type="button" class="btn btn-primary mb-2">Save</button>
+                
+                <div class="row" >
+                    <div class="col-md-6">
+                        <div class="form-group row">
+                            <label for="height" class="col-sm-4 col-form-label">Height (mdpl) </label>
+                            <div class="col-sm-4">
+                            <input type="number" class="form-control" id="min_height" placeholder="Min Height">
+                            </div>
+                            <div class="col-sm-4">
+                            <input type="number" class="form-control" id="max_height" placeholder="Max Height">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="temperature" class="col-sm-4 col-form-label">Air Temperature (C)</label>
+                            <div class="col-sm-4">
+                            <input type="number" class="form-control" id="min_temperature" placeholder="Min Temperature">
+                            </div>
+                            <div class="col-sm-4">
+                            <input type="number" class="form-control" id="max_temperature" placeholder="Max Temperature">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="humidity" class="col-sm-4 col-form-label">Humidity (%)</label>
+                            <div class="col-sm-4">
+                            <input type="number" class="form-control" id="min_humidity" placeholder="Min Humidity">
+                            </div>
+                            <div class="col-sm-4">
+                            <input type="number" class="form-control" id="max_humidity" placeholder="Max Humidity">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="rainfall" class="col-sm-4 col-form-label">Rainfall (mm/year)</label>
+                            <div class="col-sm-4">
+                            <input type="number" class="form-control" id="min_rainfall" placeholder="Min Rainfall">
+                            </div>
+                            <div class="col-sm-4">
+                            <input type="number" class="form-control" id="max_rainfall" placeholder="Max Rainfall">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="soil">Type of Soils</label>
+                        <div id="soilscheckbox">
+                        </div>
+                    </div>
+                </div>
+         
+                <button id="savePlant" type="button" class="btn btn-primary mb-2">Save</button>
             </form>
         </div>
     </div>
 
     <br>
 
-    <h5># Soils</h5>
+    <h5># Plants</h5>
     <table class="table table-bordered">
         <tr>
             <th>Name</th>
             <th>Desc</th>
+            <th>Benefits</th>
             <th width="180" class="text-center">Action</th>
         </tr>
         <tbody id="tbody">
@@ -120,8 +173,70 @@
     firebase.initializeApp(config);
     var database = firebase.database();
     var lastIndex = 0;
-    // Get Data
+
+
+    // Get Soils Data
     firebase.database().ref('soils/').on('value', function (snapshot) {
+        var value = snapshot.val();
+        var htmls = [];
+        $.each(value, function (index, value) {
+            if (value) {
+                htmls.push(
+                    '<div  class="custom-control custom-checkbox">\
+                        <input type="checkbox" class="custom-control-input" id="' + index + '" name="soil"  value="' + value.name + '">\
+                        <label class="custom-control-label" for="' + index + '">' + value.name + '</label>\
+                    </div>'
+                );
+            }
+            lastIndex = index;
+        });
+        $('#soilscheckbox').html(htmls);
+        
+    });
+
+    // Add Plant Data
+    $('#savePlant').on('click', function () {
+        var values = $("#addPlant").serializeArray();
+        var name = document.getElementById("name").value;
+        var desc = document.getElementById("desc").value;
+        var benefit = document.getElementById("benefit").value;
+        var min_height = document.getElementById("min_height").value;
+        var max_height = document.getElementById("max_height").value;
+        var min_temperature = document.getElementById("min_temperature").value;
+        var max_temperature = document.getElementById("max_temperature").value;
+        var min_humidity = document.getElementById("min_humidity").value;
+        var max_humidity = document.getElementById("max_humidity").value;
+        var min_rainfall = document.getElementById("min_rainfall").value;
+        var max_rainfall = document.getElementById("max_rainfall").value;
+        var soil_array = [];
+        $("input:checkbox[name=soil]:checked").each(function(){
+            soil_array.push($(this).val());
+        });
+        var plantID = lastIndex + 1;
+        console.log(values);
+        console.log(soil_array);
+        var plantID = lastIndex + 1;
+        firebase.database().ref('plants/' + plantID).set({
+            name: name,
+            desc: desc,
+            benefit: benefit,
+            min_height: min_height,
+            max_height: max_height,
+            min_temperature: min_temperature,
+            max_temperature: max_temperature,
+            min_humidity: min_humidity,
+            max_humidity: max_humidity,
+            min_rainfall: min_rainfall,
+            max_rainfall: max_rainfall,
+            soil: soil_array,
+        });
+        lastIndex = plantID;
+        $("#addPlants input").val("");
+    });
+    
+
+    // Get Plants Data
+    firebase.database().ref('plants/').on('value', function (snapshot) {
         var value = snapshot.val();
         var htmls = [];
         $.each(value, function (index, value) {
@@ -129,6 +244,7 @@
                 htmls.push('<tr>\
         		<td>' + value.name + '</td>\
         		<td>' + value.desc + '</td>\
+                <td>' + value.benefit + '</td>\
         		<td><button data-toggle="modal" data-target="#update-modal" class="btn btn-info updateData" data-id="' + index + '">Update</button>\
         		<button data-toggle="modal" data-target="#remove-modal" class="btn btn-danger removeData" data-id="' + index + '">Delete</button></td>\
         	</tr>');
@@ -138,21 +254,7 @@
         $('#tbody').html(htmls);
         $("#submitUser").removeClass('desabled');
     });
-    // Add Data
-    $('#saveSoil').on('click', function () {
-        var values = $("#addSoil").serializeArray();
-        var name = values[0].value;
-        var desc = values[1].value;
-        var userID = lastIndex + 1;
-        console.log(values);
-        firebase.database().ref('soils/' + userID).set({
-            name: name,
-            desc: desc,
-        });
-        // Reassign lastID value
-        lastIndex = userID;
-        $("#addSoil input").val("");
-    });
+
     // Update Data
     var updateID = 0;
     $('body').on('click', '.updateData', function () {
@@ -185,7 +287,8 @@
         firebase.database().ref().update(updates);
         $("#update-modal").modal('hide');
     });
-    // Remove Data
+
+    // Remove Plant Data
     $("body").on('click', '.removeData', function () {
         var id = $(this).attr('data-id');
         $('body').find('.users-remove-record-model').append('<input name="id" type="hidden" value="' + id + '">');
@@ -193,7 +296,7 @@
     $('.deleteRecord').on('click', function () {
         var values = $(".users-remove-record-model").serializeArray();
         var id = values[0].value;
-        firebase.database().ref('soils/' + id).remove();
+        firebase.database().ref('plants/' + id).remove();
         $('body').find('.users-remove-record-model').find("input").remove();
         $("#remove-modal").modal('hide');
     });

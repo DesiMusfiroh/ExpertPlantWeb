@@ -106,9 +106,8 @@
 
 <!-- Update Model -->
 <form action="" method="POST" class="users-update-record-model form-horizontal">
-    <div id="update-modal" data-backdrop="static" data-keyboard="false" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="custom-width-modalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" style="width:55%;">
+    <div id="update-modal" data-backdrop="static" data-keyboard="false" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="custom-width-modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" style="width:80%;">
             <div class="modal-content" style="overflow: hidden;">
                 <div class="modal-header">
                     <h4 class="modal-title" id="custom-width-modalLabel">Update</h4>
@@ -259,31 +258,38 @@
     var updateID = 0;
     $('body').on('click', '.updateData', function () {
         updateID = $(this).attr('data-id');
-        firebase.database().ref('soils/' + updateID).on('value', function (snapshot) {
+        firebase.database().ref('plants/' + updateID).on('value', function (snapshot) {
             var values = snapshot.val();
             var updateData = '<div class="form-group">\
-		        <label for="first_name" class="col-md-12 col-form-label">Name</label>\
+		        <label for="name" class="col-md-12 col-form-label">Name</label>\
 		        <div class="col-md-12">\
 		            <input id="name" type="text" class="form-control" name="name" value="' + values.name + '" required autofocus>\
 		        </div>\
 		    </div>\
-		    <div class="form-group">\
-		        <label for="last_name" class="col-md-12 col-form-label">Description</label>\
+            <div class="form-group">\
+		        <label for="desc" class="col-md-12 col-form-label">Description</label>\
 		        <div class="col-md-12">\
 		            <input id="desc" type="text" class="form-control" name="desc" value="' + values.desc + '" required autofocus>\
+		        </div>\
+		    </div>\
+		    <div class="form-group">\
+		        <label for="benefit" class="col-md-12 col-form-label">Benefits</label>\
+		        <div class="col-md-12">\
+		            <input id="benefit" type="text" class="form-control" name="benefit" value="' + values.benefit + '" required autofocus>\
 		        </div>\
 		    </div>';
             $('#updateBody').html(updateData);
         });
     });
-    $('.updateSoil').on('click', function () {
+    $('.updatePlant').on('click', function () {
         var values = $(".users-update-record-model").serializeArray();
         var postData = {
             name: values[0].value,
             desc: values[1].value,
+            benefit: values[2].value,
         };
         var updates = {};
-        updates['/soils/' + updateID] = postData;
+        updates['/plants/' + updateID] = postData;
         firebase.database().ref().update(updates);
         $("#update-modal").modal('hide');
     });
